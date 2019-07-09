@@ -11,12 +11,96 @@
 <body>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
   <script>
-    window.onload = () => {
-      let canvas = document.getElementById('gameCanvas')
-      console.log(canvas)
-      let ctx = canvas.getContext('2d')
-      ctx.fillStyle = '#000000'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    let canvas, ctx;
+
+    let ballX = 50;
+    let ballSpeedX = 5;
+    let ballY = 50;
+    let ballSpeedY = 5;
+
+    let paddle1Y = 250;
+    let paddle2Y = 250;
+    const paddleHeight = 100;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('gameCanvas')
+      ctx = canvas.getContext('2d')
+
+      const fps = 60;
+      setInterval(() => {
+        movement();
+        drawCanvas();
+      }, 1000 / fps);
+
+      canvas.addEventListener('mousemove', (e) => {
+        paddle1Y = mousePosition(e).y - (paddleHeight / 2);
+      });
+    })
+
+    function mousePosition(e) {
+      let rect = canvas.getBoundingClientRect();
+      let root = document.documentElement;
+      let mouseX = e.clientX - rect.left - root.scrollLeft
+      let mouseY = e.clientY - rect.top - root.scrollTop
+      console.log(mouseX)
+      console.log(mouseY)
+      return {
+        x: mouseX,
+        y: mouseY
+      }
+    }
+
+    function movement() {
+      ballX = ballX + ballSpeedX;
+      ballY = ballY + ballSpeedY;
+      // left side
+      if (ballX < 0) {
+        // inline with paddle1
+        if (ballY > paddle1Y && ballY < (paddle1Y + paddleHeight)) {
+          ballSpeedX = -ballSpeedX
+        } else {
+          ballReset()
+        }
+      }
+      //  right side
+      if (ballX > canvas.width) {
+        // inline with paddle2
+        if (ballY > paddle2Y && ballY < (paddle2Y + paddleHeight)) {
+          ballSpeedX = -ballSpeedX
+        } else {
+          ballReset()
+        }
+      }
+      if (ballY > canvas.height || ballY < 0) {
+        ballSpeedY = -ballSpeedY;
+      }
+    }
+
+    function ballReset() {
+      ballX = canvas.width/2;
+      ballY = canvas.height/2;
+      ballSpeedX = -ballSpeedX;
+      // ballSpeedX = Math.random() * 5;
+      // ballSpeedY = Math.random() * 5;
+    }
+
+    function drawCanvas() {
+      drawRectangle(0, 0, canvas.width, canvas.height, '#000')
+      drawRectangle(10, paddle1Y, 10, paddleHeight, '#FFF')
+      drawRectangle(canvas.width - 20, paddle2Y, 10, paddleHeight, '#FFF')
+      drawCircle(ballX, ballY, 10, '#FFF')
+    }
+
+    function drawRectangle(leftX, topY, width, height, colour) {
+      ctx.fillStyle = colour
+      ctx.fillRect(leftX, topY, width, height)
+    }
+
+    function drawCircle(centreX, centreY, radius, colour) {
+      ctx.fillStyle = colour
+      ctx.beginPath()
+      ctx.arc(centreX, centreY, radius, 0, Math.PI * 2, true)
+      ctx.fill()
     }
   </script>
 </body>
