@@ -12,6 +12,7 @@
   <canvas id="gameCanvas" width="800" height="600"></canvas>
   <script>
     let canvas, ctx;
+    const fps = 60;
 
     let ballX = 50;
     let ballSpeedX = 5;
@@ -21,12 +22,16 @@
     let paddle1Y = 250;
     let paddle2Y = 250;
     const paddleHeight = 100;
+    const winningScore = 3;
+
+    let scorePlayer1 = 0;
+    let scorePlayer2 = 0;
+    let showMenu = false;
 
     window.addEventListener('DOMContentLoaded', () => {
       canvas = document.getElementById('gameCanvas')
       ctx = canvas.getContext('2d')
 
-      const fps = 60;
       setInterval(() => {
         movement();
         drawCanvas();
@@ -35,7 +40,17 @@
       canvas.addEventListener('mousemove', (e) => {
         paddle1Y = mousePosition(e).y - (paddleHeight / 2);
       });
+
+      canvas.addEventListener('mousedown', handleMouseClick);
     })
+
+    function handleMouseClick(e) {
+      if (showMenu) {
+        scorePlayer1 = 0
+        scorePlayer2 = 0
+        showMenu = !showMenu
+      }
+    }
 
     function mousePosition(e) {
       let rect = canvas.getBoundingClientRect();
@@ -50,16 +65,28 @@
       }
     }
 
+    function npcMovement() {
+      (paddle2Y + paddleHeight/2) < ballY ? paddle2Y += 4 :  paddle2Y -= 4;
+    }
+
     function movement() {
-      ballX = ballX + ballSpeedX;
-      ballY = ballY + ballSpeedY;
+      if (showMenu) {
+        return;
+      }
+      ballX += ballSpeedX;
+      ballY += ballSpeedY;
       // left side
       if (ballX < 0) {
         // inline with paddle1
         if (ballY > paddle1Y && ballY < (paddle1Y + paddleHeight)) {
           ballSpeedX = -ballSpeedX
+
+          let deltaY = ballY - (paddle1Y + paddleHeight/2);
+          ballSpeedY = deltaY * 0.3
         } else {
+          scorePlayer2++;
           ballReset()
+          console.log(scorePlayer2)
         }
       }
       //  right side
@@ -67,28 +94,46 @@
         // inline with paddle2
         if (ballY > paddle2Y && ballY < (paddle2Y + paddleHeight)) {
           ballSpeedX = -ballSpeedX
+          let deltaY = ballY - (paddle2Y + paddleHeight / 2);
+          ballSpeedY = deltaY * 0.3
         } else {
+          scorePlayer1++;
           ballReset()
+          console.log(scorePlayer1)
         }
       }
       if (ballY > canvas.height || ballY < 0) {
         ballSpeedY = -ballSpeedY;
       }
+      npcMovement()
     }
 
     function ballReset() {
+      if (scorePlayer1 === winningScore || scorePlayer2 === winningScore) {
+        showMenu = true
+      }
       ballX = canvas.width/2;
       ballY = canvas.height/2;
       ballSpeedX = -ballSpeedX;
-      // ballSpeedX = Math.random() * 5;
-      // ballSpeedY = Math.random() * 5;
     }
 
     function drawCanvas() {
       drawRectangle(0, 0, canvas.width, canvas.height, '#000')
+      if (showMenu) {
+        ctx.fillStyle = '#FFF'
+        scorePlayer1 === winningScore ? ctx.fillText("player 1 wins", 400, 250) : ctx.fillText("player 2 wins", 400, 250)
+        ctx.fillText("click to play", 400, 300)
+        return
+      }
+      for (let i = 0; i < canvas.height; i+= 40) {
+        drawRectangle(canvas.width/2 - 1, i, 2, 20, '#FFF')
+      }
       drawRectangle(10, paddle1Y, 10, paddleHeight, '#FFF')
       drawRectangle(canvas.width - 20, paddle2Y, 10, paddleHeight, '#FFF')
       drawCircle(ballX, ballY, 10, '#FFF')
+
+      ctx.fillText(scorePlayer1, 350, 100);
+      ctx.fillText(scorePlayer2, 450, 100);
     }
 
     function drawRectangle(leftX, topY, width, height, colour) {
