@@ -76,32 +76,34 @@
       ballX += ballSpeedX;
       ballY += ballSpeedY;
       // left side
-      if (ballX < 0) {
+      // if (ballX <= 25 && ballX >= 20) {
         // inline with paddle1
-        if (ballY > paddle1Y && ballY < (paddle1Y + paddleHeight)) {
-          ballSpeedX = -ballSpeedX
+      if (ballY > paddle1Y && ballY < (paddle1Y + paddleHeight) && ballX <= 25 && ballX >= 20) {
+        ballSpeedX = -ballSpeedX
 
-          let deltaY = ballY - (paddle1Y + paddleHeight/2);
-          ballSpeedY = deltaY * 0.3
-        } else {
-          scorePlayer2++;
-          ballReset()
-          console.log(scorePlayer2)
-        }
+        let deltaY = ballY - (paddle1Y + paddleHeight/2);
+        ballSpeedY = deltaY * 0.3
       }
+      if (ballX <= 0){
+        scorePlayer2++;
+        ballReset()
+        console.log(scorePlayer2)
+      }
+      // }
       //  right side
-      if (ballX > canvas.width) {
+      // if (ballX > (canvas.width - 25)) {
         // inline with paddle2
-        if (ballY > paddle2Y && ballY < (paddle2Y + paddleHeight)) {
-          ballSpeedX = -ballSpeedX
-          let deltaY = ballY - (paddle2Y + paddleHeight / 2);
-          ballSpeedY = deltaY * 0.3
-        } else {
-          scorePlayer1++;
-          ballReset()
-          console.log(scorePlayer1)
-        }
+      if (ballY > paddle2Y && ballY < (paddle2Y + paddleHeight) && ballX >= (canvas.width - 25) && ballX <= (canvas.width - 20)) {
+        ballSpeedX = -ballSpeedX
+        let deltaY = ballY - (paddle2Y + paddleHeight / 2);
+        ballSpeedY = deltaY * 0.3
+      } 
+      if(ballX >= canvas.width){
+        scorePlayer1++;
+        ballReset()
+        console.log(scorePlayer1)
       }
+      // }
       if (ballY > canvas.height || ballY < 0) {
         ballSpeedY = -ballSpeedY;
       }
@@ -115,6 +117,7 @@
       ballX = canvas.width/2;
       ballY = canvas.height/2;
       ballSpeedX = -ballSpeedX;
+      ballSpeedY = (Math.random() - 0.5) * 5;
     }
 
     function drawCanvas() {
